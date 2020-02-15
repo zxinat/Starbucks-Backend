@@ -2,6 +2,7 @@
 using ClusterManager.Dao.Infrastructures;
 using ClusterManager.Dto.Infrastructures;
 using ClusterManager.Model;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,26 +15,30 @@ namespace ClusterManager.Core
         private readonly IAKSDto _aKSDto;
         private readonly ITokenDto _tokenDto;
         private readonly IAccountDao _accountDao;
-        public AKSBus(IAKSDto aKSDto,ITokenDto tokenDto,IAccountDao accountDao)
+        private readonly IOptions<TokenResourceModel> _tokenResource;
+        //public string ManageResource = "https://management.chinacloudapi.cn";
+        //public string LogAnalyResource = "https://api.loganalytics.azure.cn";
+        public AKSBus(IAKSDto aKSDto,ITokenDto tokenDto,IAccountDao accountDao, IOptions<TokenResourceModel> tokenResource)
         {
             this._aKSDto = aKSDto;
             this._tokenDto = tokenDto;
             _accountDao = accountDao;
+            _tokenResource = tokenResource;
 
         }
         public async Task<object> ListAllAKS(string email,string subid)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._aKSDto.ListAllAKS(subid, access_token);
         }
         public async Task<object> GetAKSInfo(string email, string subid,string resourceGroup, string AKSName)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._aKSDto.GetAKSInfo(subid, resourceGroup, AKSName, access_token);
         }
         public async Task<object> CreateAKS(string email,string subid,string resourceGroupName, CreateAKSModel createAKSModel)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             ServicePrinciple servicePrinciple = _accountDao.GetCurrentService(email);
             return await this._aKSDto.CreateAKS(subid, resourceGroupName, createAKSModel, servicePrinciple.ClientId, servicePrinciple.ClientSecret, access_token);
         }

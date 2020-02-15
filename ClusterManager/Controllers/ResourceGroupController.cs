@@ -25,15 +25,15 @@ namespace ClusterManager.Controllers
         {
             return await this._resourceGroupBus.GetAllResourceGroup(email,subid);
         }
-        [HttpPut("{email}/CreateOrUpdate/{resourceGroupName}/{location}")]
-        public async Task<string> CreateOrUpdate(string email,string resourceGroupName,string location)
+        [HttpPut("{email}/{subid}/CreateOrUpdate/{resourceGroupName}/{location}")]
+        public async Task<string> CreateOrUpdate(string email,string subid,string resourceGroupName,string location)
         {
-            return await this._resourceGroupBus.CreateOrUpdate(email, resourceGroupName,location);
+            return await this._resourceGroupBus.CreateOrUpdate(email,subid,resourceGroupName,location);
         }
-        [HttpGet("{email}/{resourceGroupName}/ListAllResource")]
-        public async Task<string> ListAllResource(string email,string resourceGroupName)
+        [HttpGet("{email}/{subid}/{resourceGroupName}/ListAllResource")]
+        public async Task<string> ListAllResource(string email,string subid,string resourceGroupName)
         {
-            return await this._resourceGroupBus.ListResource(email,resourceGroupName);
+            return await this._resourceGroupBus.ListResource(email,subid,resourceGroupName);
         }
         [HttpGet("{email}/GetSubscriptions")]
         public async Task<List<SubscriptionModel>> GetSubscriptions(string email)

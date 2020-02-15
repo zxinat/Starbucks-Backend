@@ -19,6 +19,7 @@ namespace ClusterManager.DI
             builder.RegisterType<TokenDto>().As<ITokenDto>();
             builder.RegisterType<ResourceGroupDto>().As<IResourceGroupDto>();
             builder.RegisterType<AKSDto>().As<IAKSDto>();
+            builder.RegisterType<MonitorDto>().As<IMonitorDto>();
             builder.RegisterType<SubscriptionDto>().As<ISubscriptionDto>();
             builder.RegisterType<AccountDao>().As<IAccountDao>();
             //builder.RegisterType<TokenDao>().As<ITokenDao>();
@@ -28,6 +29,7 @@ namespace ClusterManager.DI
             builder.RegisterType<AKSBus>().As<IAKSBus>();
             builder.RegisterType<AccountBus>().As<IAccountBus>();
             builder.RegisterType<AuthBus>().As<IAuthBus>();
+            builder.RegisterType<MonitorBus>().As<IMonitorBus>();
             //base.Load(builder);
            
         }

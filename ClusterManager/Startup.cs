@@ -16,7 +16,6 @@ using ClusterManager.Model;
 using WebApiClient.Extensions.Autofac;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WebApiClient;
 using ClusterManager.DI;
 using Microsoft.AspNetCore.HttpOverrides;
 using Swashbuckle.AspNetCore.Swagger;
@@ -79,8 +78,9 @@ namespace ClusterManager
             .AddCookie();*/
             services.Configure<AccountModel>(Configuration.GetSection("accountsetting"));
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
-            JwtSettings jwtSettings = new JwtSettings();
-            Configuration.Bind("JwtSettings", jwtSettings);
+            services.Configure<TokenResourceModel>(Configuration.GetSection("TokenResource"));
+            //JwtSettings jwtSettings = new JwtSettings();
+            //Configuration.Bind("JwtSettings", jwtSettings);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -100,6 +100,11 @@ namespace ClusterManager
                 x.BaseAddress = new Uri("https://management.chinacloudapi.cn/subscriptions/");
                 x.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
             });
+            services.AddHttpClient("LogAnalyResource", x =>
+             {
+                 x.BaseAddress = new Uri("https://api.loganalytics.azure.cn");
+                 x.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+             });
             services.AddHttpClient();
             services.AddLogging();
             services.AddScoped<JWTHelper>();

@@ -8,19 +8,31 @@ using ClusterManager.Dto.Infrastructures;
 using ClusterManager.Model;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ClusterManager.Dto
 {
     public class TokenDto:ITokenDto
     {
         private readonly IAccountDao _accountDao;
-        private readonly IConfiguration _configuration; 
-        public TokenDto(IConfiguration configuration,IAccountDao accountDao)
+        private readonly IConfiguration _configuration;
+        private IMemoryCache _cache;
+        public TokenDto(IConfiguration configuration,IAccountDao accountDao,IMemoryCache cache)
         {
             this._accountDao = accountDao;
             this._configuration = configuration;
+            _cache = cache;
         }
-        public async Task<TokenModel>  GetToken(string email)
+        public string GetTokenString(string email,string resource)
+        {
+            _cache.GetOrCreate(resource, entry =>
+            {
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(55));
+                return GetToken(email,resource).Result.access_token;
+            });
+            return _cache.Get(resource).ToString();
+        }
+        public async Task<TokenModel>  GetToken(string email,string resource)
         {
             ServicePrinciple servicePrinciple=this._accountDao.GetCurrentService(email);
             //string clientId = this._configuration["accountsetting:clientId"];
@@ -31,7 +43,7 @@ namespace ClusterManager.Dto
             string tenantId = servicePrinciple.TenantId;
             //string clientSecret = "77b650d9-f8d3-4511-8587-c6c930e05225";
             string clientSecret = servicePrinciple.ClientSecret;
-            string resource = "https://management.chinacloudapi.cn";
+            //string resource = "https://management.chinacloudapi.cn";
             string clientId = servicePrinciple.ClientId;
             //string clientId = "57d1ea2f-7ba4-4d03-936a-036368ff957c";
             List<KeyValuePair<string, string>> vals = new List<KeyValuePair<string, string>>();

@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using ClusterManager.Dao.Infrastructures;
 using ClusterManager.Core.Infrastructures;
 using Newtonsoft.Json.Linq;
+using ClusterManager.Dto.Infrastructures;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ClusterManager.Controllers
 {
@@ -20,11 +22,38 @@ namespace ClusterManager.Controllers
         private IConfiguration _configuration;
         private AccountModel _account;
         private readonly IAccountBus _accountBus;
-        public ValuesController(IOptions<AccountModel> account,IConfiguration configuration,IAccountBus accountBus)
+        private readonly ITokenDto _tokenDto;
+        private IMemoryCache _cache; 
+        public ValuesController(IOptions<AccountModel> account,IConfiguration configuration,IAccountBus accountBus,ITokenDto tokenDto,IMemoryCache cache)
         {
             _configuration = configuration;
             this._account = account.Value;
             _accountBus = accountBus;
+            _tokenDto = tokenDto;
+            _cache = cache;
+        }
+
+        [HttpGet("GetOrCreateTokenCache/{email}")]
+        public IActionResult GetOrCreateTokenCache(string email)
+        {
+            string resource = "https://management.chinacloudapi.cn";
+            _cache.GetOrCreate("token", entry =>
+             {
+                 entry.SetAbsoluteExpiration(TimeSpan.FromSeconds(10));
+                 /*entry.RegisterPostEvictionCallback((key, value, reason, state) =>
+                 {
+                     Console.WriteLine(key);
+                     Console.WriteLine(value);
+                     Console.WriteLine(reason);
+                     Console.WriteLine(state);
+                 });*/
+                 return  _tokenDto.GetToken(email, resource).Result.access_token;
+             });
+            return Ok(new
+            {
+                validtime= 10,
+                access_token=_cache.Get("token")
+            });
         }
         // GET api/values
         [HttpGet]

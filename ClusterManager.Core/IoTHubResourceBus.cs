@@ -25,9 +25,12 @@ namespace ClusterManager.Core
         readonly IIoTHubResourceDto _ioTHubResourceDto;
         private IAccountDao _accountDao;
         readonly IConfiguration _configuration;
-        readonly AccountModel _accountModel;
-        private readonly AccountDataModel _accountDataModel;
+        //readonly AccountModel _accountModel;
+        //private readonly AccountDataModel _accountDataModel;
         private readonly ISubscriptionDto _subscriptionDto;
+        private readonly IOptions<TokenResourceModel> _tokenResource;
+        //public string ManageResource = "https://management.chinacloudapi.cn";
+        //public string LogAnalyResource = "https://api.loganalytics.azure.cn";
         //readonly string subid;
         readonly string access_token;
         public IoTHubResourceBus(
@@ -35,13 +38,15 @@ namespace ClusterManager.Core
             ISubscriptionDto subscriptionDto,
             IIoTHubResourceDto ioTHubResourceDto,
             IConfiguration configuration,
-            IAccountDao accountDao)
+            IAccountDao accountDao,
+            IOptions<TokenResourceModel> tokenResource)
         {
             _accountDao = accountDao;
             this._tokenDto = tokenDto;
             this._ioTHubResourceDto = ioTHubResourceDto;
             this._configuration = configuration;
             _subscriptionDto = subscriptionDto;
+            _tokenResource = tokenResource;
             //this.subid= "6273fbea-8a11-498b-8218-02b6f4398e12";
 
             //this._accountModel = accountModel;
@@ -57,14 +62,14 @@ namespace ClusterManager.Core
 //        }
         public async Task<string> GetBySubId(string email,string subid)
         {
-            TokenModel Token = this._tokenDto.GetToken(email).Result;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             //var accountModel= this._configuration.GetSection("appsettings").Value;
             //SubId = this._accountModel.subscriptionId;
             //subId = "6273fbea-8a11-498b-8218-02b6f4398e12";
-            
+
             Model.ResponseModel.IoTHubResourceModel objs = null;
             //IoTHubResourceDto ioTHubResourceDto = new IoTHubResourceDto();
-            objs = await this._ioTHubResourceDto.ListBySubId(subid, Token.access_token);
+            objs = await this._ioTHubResourceDto.ListBySubId(subid, access_token);
             List<Model.IoTHubResourceViewModel> listBySubIdResponse = new List<Model.IoTHubResourceViewModel>();
             foreach (var ob in objs.value)
             {
@@ -84,23 +89,23 @@ namespace ClusterManager.Core
         {
             //string subid = this._configuration["accountsetting:subscriptionId"];
             //string subid = "6273fbea-8a11-498b-8218-02b6f4398e12";
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.CreateOrUpdate(subid,ioTHubModel,resourceGroupName,access_token);
         }
         public async Task<string> DeleteIoTHub(string email,string subid,string resourceGroupName, string resourceName)
         {
             //string subid = "6273fbea-8a11-498b-8218-02b6f4398e12";
-            string access_token= this._tokenDto.GetToken(email).Result.access_token; 
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.DeleteIotHub(subid, resourceGroupName, resourceName, access_token);
         }
         public async Task<IoTHubInfoModel> GetIoTHubInfo(string email,string subid ,string resourceGroupName, string resourceName)
         {
-            string access_token= this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
         }
         public async Task<IoTHubKeys> GetIoTHubKeys(string email, string subid,string resourceGroupName, string resourceName)
         {
-            string access_token=this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
         }
         public async Task<string> CreateDevice(AccessPolicyModel accessPolicyModel, string deviceId,bool isIotEdge)
@@ -109,7 +114,7 @@ namespace ClusterManager.Core
         }
         public async Task<DeviceInfoModel> GetDeviceInfo(string email,string subid,string resourceGroupName, string resourceName, string deviceId)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
             IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
             AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
@@ -122,7 +127,7 @@ namespace ClusterManager.Core
         }
         public async Task<DeviceInfoModel> UpdateDeviceInfo(string email,string subid,string resourceGroupName, string resourceName, string deviceId, UpdateDeviceViewModel updateDeviceViewModel)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
             IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
             AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
@@ -135,12 +140,12 @@ namespace ClusterManager.Core
         }
         public async Task<object> GetIotEdgeDevices(AccessPolicyModel accessPolicyModel, string email)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.GetIotEdgeDevices(accessPolicyModel, access_token);
         }
         public async Task<object> GetIotDevices(AccessPolicyModel accessPolicyModel, string email)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.GetIotDevices(accessPolicyModel, access_token);
         }
         public IQuery ListDevices( int maxCount,AccessPolicyModel accessPolicyModel)
@@ -162,7 +167,7 @@ namespace ClusterManager.Core
         }
         public Task<Twin> GetDeivceTwin(string email, string deviceId, AccessPolicyModel accessPolicyModel)
         {
-            string access_token=this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return this._ioTHubResourceDto.GetDeviceTwin(deviceId, accessPolicyModel,access_token);
         }
         //public Task<Twin> UpdateDeviceTwin(string deviceId, string jsonTwinPatch, string etag, AccessPolicyModel accessPolicyModel)
@@ -171,7 +176,7 @@ namespace ClusterManager.Core
         //}
         public async Task<string> UpdateDeviceTwin(string email,string subid,string resourceGroupName, string resourceName, string deviceId,Twin twin)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid,resourceGroupName, resourceName,access_token);
             IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
             AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
@@ -184,7 +189,7 @@ namespace ClusterManager.Core
         }
         public async Task<object> GetIoTEdgeDeviceDeployment(string email,string subid,string resourceGroupName, string resourceName)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
             IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
             AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
@@ -197,7 +202,7 @@ namespace ClusterManager.Core
         }
         public async Task<object> GetDeviceModules(string email,string subid,string resourceGroupName,string resourceName,string deviceId)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName,access_token);
             IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
             AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
@@ -210,7 +215,7 @@ namespace ClusterManager.Core
         }
         public async Task<InsightResponseModel> GetIoTHubInsight(string email,string subid,string resourceGroupName,string resourceName,InsightModel insightModel)
         {
-            string access_token = this._tokenDto.GetToken(email).Result.access_token;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.GetIoTHubInsight(subid,resourceGroupName,resourceName,access_token,insightModel);
         }
         
