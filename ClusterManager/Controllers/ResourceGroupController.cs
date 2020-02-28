@@ -40,5 +40,10 @@ namespace ClusterManager.Controllers
         {
             return await this._resourceGroupBus.GetSubsciptions(email);
         }
+        [HttpGet("{email}/{subid}/GetSubscriptionNameById")]
+        public async Task<string> GetSubscriptionNameById(string email,string subid)
+        {
+            return await this._resourceGroupBus.GetSubscriptionNameById(email, subid);
+        }
     }
 }

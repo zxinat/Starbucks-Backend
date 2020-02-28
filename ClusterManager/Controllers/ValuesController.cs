@@ -12,6 +12,9 @@ using ClusterManager.Core.Infrastructures;
 using Newtonsoft.Json.Linq;
 using ClusterManager.Dto.Infrastructures;
 using Microsoft.Extensions.Caching.Memory;
+using ClusterManager.Utility;
+using ClusterManager.Model.APIModels.ResponseModel;
+using Newtonsoft.Json;
 
 namespace ClusterManager.Controllers
 {
@@ -67,7 +70,7 @@ namespace ClusterManager.Controllers
         [HttpGet("{id}")]
         public ActionResult<string> Get(int id)
         {
-            new JObject
+            new Newtonsoft.Json.Linq.JObject
             {
                 { "$message",123}
             };
@@ -85,6 +88,13 @@ namespace ClusterManager.Controllers
         public void Put(int id, [FromBody] string value)
         {
         }
+        [HttpGet("UTC2CCT/{utcTime}")]
+        public string UTC2CCT(string utcTime)
+        {
+            DateTransform dateTransform = new DateTransform();
+            return dateTransform.UTC2CCT(utcTime);
+        }
+
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
@@ -100,6 +110,156 @@ namespace ClusterManager.Controllers
         public object Login([FromBody] AccountModel accountModel)
         {
             return _accountBus.Login(accountModel.email, accountModel.password);
+        }
+        [HttpPost("testCreateDeployment")]
+        public object createdeployment(string modulename,[FromBody] CreateDeploymentModel deploymentModel)
+        {
+            deploymentModel.content.modulesContent._edgeAgent.agentpropertiesdesired.schemaVersion = "1.0";
+            /*Module module = new Module()
+            {
+                settings =
+                {
+                    image="image",
+                    createOptions="string"
+                },
+                type="docker",
+                status="running",
+                restartPolicy="always",
+                version="1.0"
+            };*/
+            Newtonsoft.Json.Linq.JObject newmo = new Newtonsoft.Json.Linq.JObject
+            {
+                {
+                    modulename,new Newtonsoft.Json.Linq.JObject
+                    {
+                        {
+                            "settings",new Newtonsoft.Json.Linq.JObject
+                            {
+                                {"image","image" },
+                                {"createOptions","string" }
+                            }
+                        },
+                        {"type","docker" },
+                        {"status","running" },
+                        {"restartPolicy","always" },
+                        {"version","1.0" }
+                    }
+                }
+            };
+            Newtonsoft.Json.Linq.JObject mo = new Newtonsoft.Json.Linq.JObject
+            {
+                {
+                    "settings",new Newtonsoft.Json.Linq.JObject
+                    {
+                        {"image","image" },
+                        {"createOptions","string" }
+                    }
+                },
+               {"type","docker" },
+               {"status","running" },
+               {"restartPolicy","always" },
+               {"version","1.0" }
+            };
+            //JObject jo = JsonConvert.DeserializeObject<JObject>(module.ToString());
+            /*JObject mo = new JObject
+            {
+                {modulename,jo }
+            };*/
+            deploymentModel.content.modulesContent._edgeAgent.agentpropertiesdesired.modules.Add(modulename,mo);
+            return deploymentModel ;
+        }
+        [HttpPost("addmodule")]
+        public object addmodule(string modulename,[FromBody] Module nmodule)
+        {
+            CreateDeploymentModel deploymentfile = new CreateDeploymentModel()
+            {
+                id = "123",
+                labels = null,
+                priority = 10,
+                targetCondition = "string",
+                content = {
+                    modulesContent =
+                    {
+                        _edgeAgent =
+                        {
+                            agentpropertiesdesired =
+                            {
+                                runtime =
+                                {
+                                    settings =
+                                    { minDockerVersion = "v1.25"},
+                                  type = "docker"
+                                },
+                                schemaVersion = "1.0",
+                                systemModules =
+                                {
+                                    edgeAgent =
+                                    {
+                                        settings =
+                                        {
+                                            image = "image"
+                                        },
+                                        type = "docker"
+                                    },
+                                    edgeHub =
+                                    {
+                                        settings =
+                                        {
+                                            image = "image",
+                                            createOptions = "string"
+                                        },
+                                        type = "docker",
+                                        status = "running",
+                                        restartPolicy = "always"
+                                    }
+                                }
+                            }
+                        },
+                        _edgeHub =
+                        {
+                            edgehubpropertiesdesired =
+                            {
+                                routes = null,
+                                schemaVersion = "1.0",
+                                storeAndForwardConfiguration =
+                                {
+                                    timeToLiveSecs = 7200
+                                }
+                            }
+                        }
+                    }
+                },
+                metrics =
+                {
+                    queries = null,
+                    results = null,
+                },
+                etag = "*"
+
+            };
+            string mod = JsonConvert.SerializeObject(nmodule);
+            Newtonsoft.Json.Linq.JObject newmodule = new Newtonsoft.Json.Linq.JObject
+            {
+                {modulename,(Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(mod) }
+            };
+            //deploymentfile.content.modulesContent._edgeAgent.agentpropertiesdesired.modules.Add(newmodule);
+            return deploymentfile;
+        }
+        [HttpPost("getDefaultDeployment")]
+        public object getDefaultDeployment()
+        {
+            CreateDeploymentModel deploymentfile = new CreateDeploymentModel();
+            return deploymentfile;
+        }
+        [HttpGet("generateSasToken/{resourceUri}/{key}/{policyName}/{expiryInSeconds}")]
+        public string generateSasToken(string resourceUri,string key,string policyName,int expiryInSeconds)
+        {
+            return _tokenDto.generateSasToken(resourceUri, key, policyName, expiryInSeconds);
+        }
+        [HttpGet("getSas")]
+        public string getSas()
+        {
+            return _tokenDto.getIoTHubSasToken();
         }
     }
 }

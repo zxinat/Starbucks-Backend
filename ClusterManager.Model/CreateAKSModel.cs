@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,6 +9,7 @@ namespace ClusterManager.Model
     {
         public string name { get; set; }
         public string location { get; set; }
+        public JObject tags { get; set; }
         public AKSProperties Properties { get; set; }
 
     }
@@ -16,7 +18,7 @@ namespace ClusterManager.Model
         /// <summary>
         /// 
         /// </summary>
-        //public string name { get; set; }
+        public string name { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -25,6 +27,8 @@ namespace ClusterManager.Model
         /// 
         /// </summary>
         public string vmSize { get; set; }
+        public string osType { get; set; }
+
     }
 
     public class NetworkProfile
@@ -39,7 +43,7 @@ namespace ClusterManager.Model
         //public string outboundType { get; set; }
     }
 
-    /*public class ServicePrincipalProfile
+    public class ServicePrincipalProfile
     {
         /// <summary>
         /// 
@@ -49,7 +53,22 @@ namespace ClusterManager.Model
         /// 
         /// </summary>
         public string secret { get; set; }
-    }*/
+    }
+
+    public class AddonProfiles
+    {
+        public OmsAgent omsagent { get; set; }
+    }
+    public class OmsAgent
+    {
+        public Config config { get; set; }
+        public bool enabled { get; set; }
+    }
+
+    public class Config
+    {
+        public string logAnalyticsWorkspaceResourceID { get; set; }
+    }
 
     public class AKSProperties
     {
@@ -72,6 +91,10 @@ namespace ClusterManager.Model
         /// <summary>
         /// 
         /// </summary>
-        //public ServicePrincipalProfile servicePrincipalProfile { get; set; }
+        public ServicePrincipalProfile servicePrincipalProfile { get; set; }
+
+        public AddonProfiles addonProfiles { get; set; }
+
+        public bool enableRBAC { get; set; }
     }
 }

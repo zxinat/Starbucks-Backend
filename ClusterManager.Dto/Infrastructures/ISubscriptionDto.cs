@@ -9,5 +9,6 @@ namespace ClusterManager.Dto.Infrastructures
     public interface ISubscriptionDto
     {
         Task<List<SubscriptionModel>> GetSubscriptions(string access_token);
+        Task<string> GetSubscriptionNameById(string subid, string access_token);
     }
 }

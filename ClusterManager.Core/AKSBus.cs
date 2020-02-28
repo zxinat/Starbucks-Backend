@@ -36,11 +36,25 @@ namespace ClusterManager.Core
             string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._aKSDto.GetAKSInfo(subid, resourceGroup, AKSName, access_token);
         }
+        public async Task<object> ListK8sVersion(string email,string subid)
+        {
+            string access_token= _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            return await this._aKSDto.ListK8sVersion(subid, access_token);
+        }
+        public async Task<object> ListWorkspace(string email,string subid)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            return await this._aKSDto.ListWorkspace(subid, access_token);
+        }
         public async Task<object> CreateAKS(string email,string subid,string resourceGroupName, CreateAKSModel createAKSModel)
         {
             string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
-            ServicePrinciple servicePrinciple = _accountDao.GetCurrentService(email);
-            return await this._aKSDto.CreateAKS(subid, resourceGroupName, createAKSModel, servicePrinciple.ClientId, servicePrinciple.ClientSecret, access_token);
+            return await this._aKSDto.CreateAKS(subid, resourceGroupName, createAKSModel,access_token);
+        }
+        public async Task<object> DeleteAKS(string email,string subid,string resourceGroupName,string resourceName)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            return await this._aKSDto.DeleteAKS(subid, resourceGroupName, resourceName, access_token);
         }
     }
 }

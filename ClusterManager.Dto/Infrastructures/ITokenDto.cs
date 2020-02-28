@@ -12,5 +12,7 @@ namespace ClusterManager.Dto.Infrastructures
         // List<TokenModel> GetToken(string tenantId);
         Task<TokenModel> GetToken(string email,string resource);
         string GetTokenString(string email, string resource);
+        string generateSasToken(string resourceUri, string key, string policyName, int expiryInSeconds = 3600);
+        string getIoTHubSasToken();
     }
 }

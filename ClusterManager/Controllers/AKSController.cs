@@ -19,19 +19,35 @@ namespace ClusterManager.Controllers
             this._aKSBus = aKSBus;
         }
         [HttpGet("{email}/{subid}/ListAllAKS")]
-        public async Task<object> ListAllAKS(string email,string subid)
+        public async Task<object> ListAllAKS(string email, string subid)
         {
-            return await this._aKSBus.ListAllAKS(email,subid);
+            return await this._aKSBus.ListAllAKS(email, subid);
         }
         [HttpGet("{email}/{subid}/{resourceGroup}/GetAKSInfo/{AKSName}")]
-        public async Task<object> GetAKSInfo(string email,string subid,string resourceGroup, string AKSName)
+        public async Task<object> GetAKSInfo(string email, string subid, string resourceGroup, string AKSName)
         {
-            return await this._aKSBus.GetAKSInfo(email,subid,resourceGroup, AKSName);
+            return await this._aKSBus.GetAKSInfo(email, subid, resourceGroup, AKSName);
         }
-        [HttpPost("{email}/{subid}/{resourceGoupName}/CreateAKS/{AKSName}")]
+        [HttpGet("{email}/{subid}/ListK8sVersion")]
+        public async Task<object> ListK8sVersion(string email,string subid)
+        {
+            return await this._aKSBus.ListK8sVersion(email, subid);
+        }
+        [HttpGet("{email}/{subid}/ListWorkspace")]
+        public async Task<object> ListWorkspace(string email,string subid)
+        {
+            return await this._aKSBus.ListWorkspace(email, subid);
+        }
+
+        [HttpPut("{email}/{subid}/{resourceGroupName}/CreateAKS/{AKSName}")]
         public async Task<object> CreateAKS(string email ,string subid,string resourceGroupName, [FromBody] CreateAKSModel createAKSModel)
         {
             return await this._aKSBus.CreateAKS(email,subid,resourceGroupName, createAKSModel);
+        }
+        [HttpDelete("{email}/{subid}/{resourceGoupName}/DeleteAKS/{AKSName}")]
+        public async Task<object> DeleteAKS(string email,string subid,string resourceGroupName,string resourceName)
+        {
+            return await this._aKSBus.DeleteAKS(email, subid, resourceGroupName, resourceName);
         }
     }
 }

@@ -62,6 +62,11 @@ namespace ClusterManager.Core
             string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._subscriptionDto.GetSubscriptions(access_token);
         }
+        public async Task<string> GetSubscriptionNameById(string email,string subid)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            return await this._subscriptionDto.GetSubscriptionNameById(subid, access_token);
+        }
 
     }
 }

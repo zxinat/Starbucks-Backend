@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using ClusterManager.Model;
+using ClusterManager.Model.APIModels.ResponseModel;
 using ClusterManager.Model.ResponseModel;
 using ClusterManager.Model.ViewModels;
+using ClusterManager.Model.ViewModels.RequestModel;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Common;
 using Microsoft.Azure.Devices.Shared;
@@ -20,11 +22,14 @@ namespace ClusterManager.Dto.Infrastructures
         Task<string> DeleteIotHub(string subid, string resourceGroupName, string resourceName, string access_token);
         Task<IoTHubInfoModel> GetIoTHubInfo(string subid, string resourceGroupName, string resourceName, string access_token);
         Task<IoTHubKeys> GetIoTHubKeys(string subid, string resourceGroupName, string resourceName, string access_token);
+        Task<IoTHubKey> GetIoTHubKeyForKeyName(string subid, string resourceGroupName, string resourceName, string keyName, string access_token);
         Task<string> CreateDevice(AccessPolicyModel createDeviceModel,string deviceId,bool isIotEdge);
         Task<DeviceInfoModel> GetDeviceInfo(AccessPolicyModel accessPolicyModel, string deviceId,string access_token);
-        Task<DeviceInfoModel> UpdateDeviceInfo(UpdateDeviceViewModel updateDeviceViewModel, AccessPolicyModel accessPolicyModel, string deviceId, string access_token);
+        Task<DeviceInfoModel> UpdateDeviceInfo(  UpdateDeviceViewModel updateDeviceViewModel, AccessPolicyModel accessPolicyModel, string deviceId, string access_token);
         Task<object> GetIotEdgeDevices(AccessPolicyModel accessPolicyModel, string access_token);
         Task<object> GetIotDevices(AccessPolicyModel accessPolicyModel, string access_token);
+        Task<object> SendMessageToDevice(AccessPolicyModel accessPolicyModel, SendMessageModel sendMessageModel, string access_token);
+        Task<object> InvokeMethod(AccessPolicyModel accessPolicyModel, DirectMethodModel directMethodModel, string access_token);
         IQuery ListDevices(int maxCount, AccessPolicyModel createDeviceModel);
         Task<ConcurrentBag<Device>> GetDevicesAsync( AccessPolicyModel accessPolicyModel);
         Task<string> DeleteDevice(string deviceId, AccessPolicyModel accessPolicyModel);
@@ -33,8 +38,17 @@ namespace ClusterManager.Dto.Infrastructures
         //Task<Twin> UpdateDeviceTwin(string deviceId, string jsonTwinPatch, string etag, AccessPolicyModel accessPolicyModel);
         Task<string> UpdateDeviceTwin(string deviceId, Twin twin, AccessPolicyModel accessPolicyModel, string access_token);
         Task<object> GetIoTEdgeDeviceDeployment(AccessPolicyModel accessPolicyModel, string access_token);
+        Task<object> CreateDevcieDeployment(AccessPolicyModel accessPolicyModel, string DeploymentId, object DeploymentData, string access_token);
+        Task<object> DeleteDeployment(AccessPolicyModel accessPolicyModel, string deploymentId, string access_token);
         Task<object> GetDeviceModules(string deviceId, AccessPolicyModel accessPolicyModel, string access_token);
+        Task<T> GetModuleTwinInfoById<T>(string hubName, string deviceId, string moduleId, string sasToken);
+        Task<Content> GetDefaultDeviceModuleContent(string resourceName, string deviceId, string sasToken);
+
+
+
+        Task<ResponseModel<DeviceModouleModel>> ListDeviceDeployment(string deviceId, AccessPolicyModel accessPolicyModel, string access_token);
         Task<InsightResponseModel> GetIoTHubInsight(string subid, string resourceGroupName, string resourceName, string access_token, InsightModel insightModel);
+        Task<List<IoTHubInsightMetricModel>> GetAllIoTHubInsightMetric(string access_token);
 
     }
 }

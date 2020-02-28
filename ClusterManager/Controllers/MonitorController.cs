@@ -36,6 +36,16 @@ namespace ClusterManager.Controllers
         {
             return await _monitorBus.GetAKSCPUMemoryInsight(email,queryParams);
         }
+        [HttpPost("Insights/{email}/{subid}/GetAKSCPUInsight")]
+        public object GetAKSCPUInsight(string email, [FromBody] AKSInsightsQueryParams queryParams)
+        {
+            return _monitorBus.GetAKSCPUOrMemoryInsight(email, "cpu",queryParams);
+        }
+        [HttpPost("Insights/{email}/{subid}/GetAKSMemoryInsight")]
+        public object GetAKSMemoryInsight(string email, [FromBody] AKSInsightsQueryParams queryParams)
+        {
+            return _monitorBus.GetAKSCPUOrMemoryInsight(email, "memory", queryParams);
+        }
         [HttpPost("Insights/{email}/{subid}/GetAKSNodeCountInsight")]
         public async Task<object> GetAKSNodeCountInsight(string email, [FromBody] AKSInsightsQueryParams queryParams)
         {
@@ -45,6 +55,36 @@ namespace ClusterManager.Controllers
         public async Task<object> GetAKSPodCountInsight(string email, [FromBody] AKSInsightsQueryParams queryParams)
         {
             return await _monitorBus.GetAKSPodCountInsight(email, queryParams);
+        }
+        [HttpPost("Insights/{email}/{subid}/GetAKSRunStatusInsight")]
+        public async Task<object> GetAKSRunStatusInsight(string email,string subid,[FromBody] AKSRunningStatusQuery queryParams)
+        {
+            return await _monitorBus.GetAKSRunStatusInsight(email, queryParams);
+        }
+        [HttpPost("Insights/{email}/{subid}/ListAllNodeInsight")]
+        public async Task<object> ListAllNodeInsight(string email,[FromBody] ListAllNodeQueryParams queryParams)
+        {
+            return await _monitorBus.ListAllNodeInsight(email, queryParams);
+        }
+        [HttpPost("Insights/{email}/{subid}/GetNodeInfo")]
+        public async Task<object> GetNodeInfo(string email,[FromBody] NodeInfoQueryParams queryParams)
+        {
+            return await _monitorBus.GetNodeInfo(email, queryParams);
+        }
+        [HttpPost("Insights/{email}/{subid}/{nodeName}/ListAKSNodeContainerInsight")]
+        public async Task<object> ListAKSNodeContainerInsight(string email,[FromBody] AKSNodeContainersQueryParams queryParams)
+        {
+            return await _monitorBus.ListAKSNodeContainerInsight(email, queryParams);
+        }
+        [HttpPost("Insights/{email}/{subid}/{podName}/GetPodInfoInsight")]
+        public async Task<object> GetPodInfoInsight(string email,[FromBody] AKSPodInfoInsightQueryParams queryParams)
+        {
+            return await _monitorBus.GetPodInfoInsight(email, queryParams);
+        }
+        [HttpPost("Insights/{email}/{subid}/{nodeName}/GetNodeContainerInfoInsight")]
+        public async Task<object> GetNodeContainerInfoInsight(string email,[FromBody] AKSNodeContainerInfoQueryParams queryParams)
+        {
+            return await _monitorBus.GetNodeContainerInfoInsight(email, queryParams);
         }
     }
 }

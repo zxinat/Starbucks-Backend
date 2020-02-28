@@ -16,14 +16,14 @@ namespace ClusterManager.Model.ResponseModel
     {
         public string id { get; set; }
         public string type { get; set; }
-        public name name { get; set; }
+        public Metricname name { get; set; }
         public string displayDescription { get; set; }
         public string unit { get; set; }
         public List<timeseries> timeseries { get; set; }
         public string errorCode { get; set; }
         
     }
-    public class name
+    public class Metricname
     {
         public string value { get; set; }
         public string localizedValue { get; set; }

@@ -8,7 +8,7 @@ namespace ClusterManager.Model.ViewModels
     {
         public string timespan { get; set; }
         public string interval { get; set; }
-        public string metricnames { get; set; }
+        public string localizedValue { get; set; }
         public string aggregation { get; set; }
     }
 }

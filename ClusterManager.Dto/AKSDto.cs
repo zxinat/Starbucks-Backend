@@ -76,13 +76,50 @@ namespace ClusterManager.Dto
                 return response.ReasonPhrase;
             }
         }
+        public async Task<object> ListK8sVersion(string subid,string access_token)
+        {
+            string url = string.Format("{0}/providers/Microsoft.ContainerService/locations/chinaeast2/orchestrators?" +
+                "api-version=2019-04-01&resource-type=managedClusters", subid);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var client = this._clientFactory.CreateClient("chinacloudapi");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                JObject job= (JObject)JsonConvert.DeserializeObject(result);
+                return job;
+            }
+            else
+            {
+                return response.ReasonPhrase;
+            }
+        }
+        public async Task<object> ListWorkspace(string subid,string access_token)
+        {
+            string url = string.Format("{0}/providers/Microsoft.OperationalInsights/workspaces?api-version=2017-04-26-preview",subid);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var client = this._clientFactory.CreateClient("chinacloudapi");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                JObject job = (JObject)JsonConvert.DeserializeObject(result);
+                return job;
+            }
+            else
+            {
+                return response.ReasonPhrase;
+            }
+        }
         public async Task<object> CreateAKS(string subid, string resourceGroupName, CreateAKSModel createAKSModel,
-            string clientId,string clientSecret,string access_token)
+            string access_token)
         {
             CreateRequestJObject createRequestJObject = new CreateRequestJObject();
-            var requestmodel = createRequestJObject.CreateAKSRequestJObject(createAKSModel,clientId,clientSecret);
+            var requestmodel = createRequestJObject.CreateAKSRequestJObject(createAKSModel);
             string url = string.Format("{0}/resourceGroups/{1}/providers/Microsoft.ContainerService" +
-                "/managedClusters/{2}?api-version=2019-10-01", subid, resourceGroupName, createAKSModel.name);
+                "/managedClusters/{2}?api-version=2019-11-01", subid, resourceGroupName, createAKSModel.name);
             var request = new HttpRequestMessage(HttpMethod.Put, url);
             var client = this._clientFactory.CreateClient("chinacloudapi");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
@@ -93,6 +130,24 @@ namespace ClusterManager.Dto
             if (response.IsSuccessStatusCode)
             {
                 return JsonConvert.DeserializeObject(result);
+            }
+            else
+            {
+                return response.ReasonPhrase;
+            }
+        }
+        public async Task<object> DeleteAKS(string subid,string resourceGroupName,string resourceName,string access_token)
+        {
+            string url = string.Format("{0}/resourceGroups/{1}/providers/Microsoft.ContainerService" +
+                "/managedClusters/{2}?api-version=2019-10-01", subid, resourceGroupName, resourceName);
+            var request = new HttpRequestMessage(HttpMethod.Delete, url);
+            var client = this._clientFactory.CreateClient("chinacloudapi");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                return response.StatusCode;
             }
             else
             {

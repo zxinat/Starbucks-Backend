@@ -42,5 +42,11 @@ namespace ClusterManager.Dto
             }
             return subscriptions.value;
         }
+        public async Task<string> GetSubscriptionNameById(string subid,string access_token)
+        {
+            List<SubscriptionModel> subscriptions = await GetSubscriptions(access_token);
+            string subscriptionName = subscriptions.Find(s => s.subscriptionId == subid).displayName;
+            return subscriptionName;
+        }
     }
 }

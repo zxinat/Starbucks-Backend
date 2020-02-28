@@ -15,5 +15,6 @@ namespace ClusterManager.Core.Infrastructures
         Task<string> CreateOrUpdate(string email,string subid,string resourceName,string location);
         Task<string> ListResource(string email,string subid,string resourceGroupName);
         Task<List<SubscriptionModel>> GetSubsciptions(string email);
+        Task<string> GetSubscriptionNameById(string email, string subid);
     }
 }

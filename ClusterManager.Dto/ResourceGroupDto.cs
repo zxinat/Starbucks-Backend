@@ -21,10 +21,22 @@ namespace ClusterManager.Dto
         public async Task<ResourceGroupModel> GetAllResource(string subid,string access_token)
         {
 
-            string url = string.Format("https://management.chinacloudapi.cn/" +
-                "subscriptions/{0}/resourcegroups?api-version=2017-05-10", subid);
+            string url = string.Format("{0}/resourcegroups?api-version=2017-05-10", subid);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var client = this._clientFactory.CreateClient("chinacloudapi");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var response = await client.SendAsync(request); 
             ResourceGroupModel resourceGroup = null;
-            using (HttpClient httpClient = new HttpClient())
+            if(response.IsSuccessStatusCode)
+            {
+                string result = await response.Content.ReadAsStringAsync();
+                resourceGroup = JsonConvert.DeserializeObject<ResourceGroupModel>(result);
+            }
+            else
+            {
+                Console.WriteLine(response.ReasonPhrase);
+            }
+            /*using (HttpClient httpClient = new HttpClient())
             {
                 //httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
                 //HttpContent content = new FormUrlEncodedContent(vals);
@@ -40,7 +52,7 @@ namespace ClusterManager.Dto
                 {
                     Console.WriteLine("Error." + hrm.ReasonPhrase);
                 }
-            }
+            }*/
             return resourceGroup;
         }
         public async Task<string> CreateOrUpdate(string subid,string resourceGroupName,string location,string access_token)
@@ -56,7 +68,6 @@ namespace ClusterManager.Dto
             JObject requestbodyJson = new JObject();
             requestbodyJson.Add("location", location);
             string requestbody = JsonConvert.SerializeObject(requestbodyJson);
-            
             //HttpContent content = new FormUrlEncodedContent(vals);
             //string requestbody = string.Format("\"location\":\"{0}\"",location);
             request.Content = new StringContent(requestbody, UnicodeEncoding.UTF8, "application/json");

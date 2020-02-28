@@ -16,6 +16,10 @@ using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Common;
 using Microsoft.Azure.Devices.Shared;
 using ClusterManager.Dao.Infrastructures;
+using ClusterManager.Model.ViewModels.RequestModel;
+using ClusterManager.Utility;
+using ClusterManager.Model.APIModels.ResponseModel;
+using ClusterManager.Model.ViewModels.ResponseModel;
 
 namespace ClusterManager.Core
 {
@@ -108,6 +112,11 @@ namespace ClusterManager.Core
             string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
         }
+        public async Task<IoTHubKey> GetIoTHubKeyForKeyName(string email,string subid,string resourceGroupName,string resourceName,string keyName)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            return await this._ioTHubResourceDto.GetIoTHubKeyForKeyName(subid, resourceGroupName, resourceName,keyName, access_token);
+        }
         public async Task<string> CreateDevice(AccessPolicyModel accessPolicyModel, string deviceId,bool isIotEdge)
         {
             return await this._ioTHubResourceDto.CreateDevice(accessPolicyModel, deviceId,isIotEdge);
@@ -142,6 +151,32 @@ namespace ClusterManager.Core
         {
             string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
             return await this._ioTHubResourceDto.GetIotEdgeDevices(accessPolicyModel, access_token);
+        }
+        public async Task<object> SendMessageToDevice(string email,string subid,string resourceGroupName,string resourceName, SendMessageModel sendMessageModel)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
+            IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
+            AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
+            {
+                HostName = ioTHubInfoModel.properties.hostName,
+                SharedAccessKeyName = ioTHubKeys.value[1].keyName,
+                SharedAccessKey = ioTHubKeys.value[1].primaryKey
+            };
+            return await this._ioTHubResourceDto.SendMessageToDevice(accessPolicyModel, sendMessageModel, access_token);
+        }
+        public async Task<object> InvokeMethod(string email,string subid,string resourceGroupName,string resourceName,DirectMethodModel directMethodModel)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
+            IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
+            AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
+            {
+                HostName = ioTHubInfoModel.properties.hostName,
+                SharedAccessKeyName = ioTHubKeys.value[1].keyName,
+                SharedAccessKey = ioTHubKeys.value[1].primaryKey
+            };
+            return await this._ioTHubResourceDto.InvokeMethod(accessPolicyModel, directMethodModel, access_token);
         }
         public async Task<object> GetIotDevices(AccessPolicyModel accessPolicyModel, string email)
         {
@@ -200,6 +235,32 @@ namespace ClusterManager.Core
             };
             return await this._ioTHubResourceDto.GetIoTEdgeDeviceDeployment(accessPolicyModel, access_token);
         }
+        public async Task<object> CreateDeviceDeployment(string email,string subid ,string resourceGroupName,string resourceName, string DeploymentId, object DeploymentData)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            IoTHubKeys ioTHubKeys= await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
+            IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
+            AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
+            {
+                HostName = ioTHubInfoModel.properties.hostName,
+                SharedAccessKeyName = ioTHubKeys.value[0].keyName,
+                SharedAccessKey = ioTHubKeys.value[0].primaryKey
+            };
+            return await this._ioTHubResourceDto.CreateDevcieDeployment(accessPolicyModel, DeploymentId, DeploymentData, access_token);
+        }
+        public async Task<object> DeleteDeviceDeployment(string email,string subid,string resourceGroupName,string resourceName,string deploymentId)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            IoTHubKeys ioTHubKeys = await this._ioTHubResourceDto.GetIoTHubKeys(subid, resourceGroupName, resourceName, access_token);
+            IoTHubInfoModel ioTHubInfoModel = await this._ioTHubResourceDto.GetIoTHubInfo(subid, resourceGroupName, resourceName, access_token);
+            AccessPolicyModel accessPolicyModel = new AccessPolicyModel()
+            {
+                HostName = ioTHubInfoModel.properties.hostName,
+                SharedAccessKeyName = ioTHubKeys.value[0].keyName,
+                SharedAccessKey = ioTHubKeys.value[0].primaryKey
+            };
+            return await this._ioTHubResourceDto.DeleteDeployment(accessPolicyModel, deploymentId, access_token);
+        }
         public async Task<object> GetDeviceModules(string email,string subid,string resourceGroupName,string resourceName,string deviceId)
         {
             string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
@@ -213,11 +274,64 @@ namespace ClusterManager.Core
             };
             return await this._ioTHubResourceDto.GetDeviceModules(deviceId, accessPolicyModel, access_token);
         }
-        public async Task<InsightResponseModel> GetIoTHubInsight(string email,string subid,string resourceGroupName,string resourceName,InsightModel insightModel)
+        //public async Task<ResponseModel<DeviceModuleViewModel>> ListDeviceDeployment()
+
+        //获取 $edgeAgent Twin Information
+        public async Task<EdgeAgentModuleTwinModel> GetEdgeAgentModuleTwin(string email,string subid,string resourceGroupName,string resourceName,string deviceId)
+        {
+            string access_token = this._tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            string resourceUri = string.Format("{0}.azure-devices.cn", resourceName);
+            string key = this._ioTHubResourceDto.GetIoTHubKeyForKeyName(subid, resourceGroupName, resourceName, "iothubowner", access_token).Result.primaryKey;
+            string sasToken = this._tokenDto.generateSasToken(resourceUri, key, "iothubowner");
+            return await this._ioTHubResourceDto.GetModuleTwinInfoById<EdgeAgentModuleTwinModel>(resourceName, deviceId, "$edgeAgent", sasToken);
+        }
+        public async Task<Content> GetDefaultDeviceModuleContent(string email, string subid, string resourceGroupName, string resourceName, string deviceId)
+        {
+            string access_token = this._tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            string resourceUri = string.Format("{0}.azure-devices.cn", resourceName);
+            string key = this._ioTHubResourceDto.GetIoTHubKeyForKeyName(subid, resourceGroupName, resourceName, "iothubowner", access_token).Result.primaryKey;
+            string sasToken = this._tokenDto.generateSasToken(resourceUri, key, "iothubowner");
+            return await this._ioTHubResourceDto.GetDefaultDeviceModuleContent(resourceName, deviceId, sasToken);
+        }
+
+
+
+        public async Task<List<Metricname>> ListIoTHubInsightlocalizedValue(string email)
         {
             string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
-            return await this._ioTHubResourceDto.GetIoTHubInsight(subid,resourceGroupName,resourceName,access_token,insightModel);
+            List<IoTHubInsightMetricModel> IoTHubInsightMetrics = await this._ioTHubResourceDto.GetAllIoTHubInsightMetric(access_token);
+            List<Metricname> metricNames = new List<Metricname>();
+            foreach (IoTHubInsightMetricModel ob in IoTHubInsightMetrics)
+            {
+                metricNames.Add(ob.name);
+            }
+            return metricNames;
         }
+        public async Task<List<string>> ListInsightAggregationByLocalizeValue(string email,string localizeValue)
+        {
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            List<IoTHubInsightMetricModel> IoTHubInsightMetrics = await this._ioTHubResourceDto.GetAllIoTHubInsightMetric(access_token);
+            List<string> aggregation = new List<string>();
+            aggregation = IoTHubInsightMetrics.Find(o => o.name.localizedValue == localizeValue).supportedAggregationTypes;
+            return aggregation;
+        }
+        public async Task<InsightResponseModel> GetIoTHubInsight(string email,string subid,string resourceGroupName,string resourceName,InsightModel insightModel)
+        {
+            Task<List<Metricname>> metricnames = ListIoTHubInsightlocalizedValue(email);
+            insightModel.localizedValue = metricnames.Result.Find(o => o.localizedValue == insightModel.localizedValue).value;
+            string access_token = _tokenDto.GetTokenString(email, _tokenResource.Value.manage);
+            DateTransform dateTransform = new DateTransform();
+            InsightResponseModel insightResponse= await this._ioTHubResourceDto.GetIoTHubInsight(subid, resourceGroupName, resourceName, access_token, insightModel);
+            if(insightResponse.value[0].timeseries.Count!=0)
+            {
+                foreach (var data in insightResponse.value[0].timeseries[0].data)
+                {
+                    data.timeStamp = dateTransform.UTC2CCT(data.timeStamp);
+                }
+            }
+            return insightResponse;
+        }
+        
         
     }
 }
